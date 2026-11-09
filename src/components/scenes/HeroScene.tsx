@@ -84,8 +84,6 @@ export default function HeroScene() {
       className="relative h-[135svh]"
       aria-label="Introduction"
     >
-      <div className="pointer-events-none absolute inset-0 z-[1] bg-[linear-gradient(180deg,rgba(8,9,11,0.45)_0%,transparent_24%,rgba(8,9,11,0.72)_46%,rgba(8,9,11,0.97)_64%,rgba(8,9,11,0.99)_100%)] md:bg-[linear-gradient(90deg,rgba(8,9,11,0.7),transparent_32%,transparent_68%,rgba(8,9,11,0.7))]" />
-
       <div className="section-pad sticky top-0 z-[2] flex h-[100svh] flex-col justify-between pb-8 pt-24 md:pb-10 md:pt-28">
         <div className="flex items-start justify-between">
           <SectionLabel index="00">Introduction</SectionLabel>

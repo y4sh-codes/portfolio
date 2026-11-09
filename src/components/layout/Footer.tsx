@@ -3,19 +3,17 @@
 import { ArrowUp } from "lucide-react";
 import SocialLinks from "@/components/ui/SocialLinks";
 import { social } from "@/data/social";
+import { smoothScrollTo } from "@/lib/animations/smoothScroll";
 
 export default function Footer() {
   const year = new Date().getFullYear();
 
   const backToTop = () => {
-    const reduced = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
+    smoothScrollTo(0, 680);
   };
 
   return (
-    <footer className="relative z-10 border-t border-white/[0.1] bg-ink/60">
+    <footer className="relative z-10 border-t border-white/[0.1] bg-ink">
       <div className="section-pad flex flex-col gap-8 py-10 md:py-12">
         <div className="flex flex-col justify-between gap-8 md:flex-row md:items-end">
           <div>

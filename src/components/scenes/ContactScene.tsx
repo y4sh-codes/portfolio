@@ -54,8 +54,6 @@ export default function ContactScene() {
       className="relative min-h-[100svh]"
       aria-labelledby="contact-heading"
     >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,rgba(138,180,248,0.06),transparent_45%)]" />
-
       <div className="section-pad relative z-[2] flex min-h-[100svh] flex-col justify-between py-28 md:py-36">
         <div className="contact-reveal flex items-start justify-between">
           <SectionLabel index="05">Contact</SectionLabel>

@@ -59,29 +59,23 @@ function CursorGlow() {
 
 function GrainOverlay() {
   return (
-    <>
-      <div
-        aria-hidden="true"
-        className="pointer-events-none fixed inset-0 z-[70] opacity-[0.045] mix-blend-soft-light"
-      >
-        <svg className="h-full w-full" xmlns="http://www.w3.org/2000/svg">
-          <filter id="portfolio-grain">
-            <feTurbulence
-              type="fractalNoise"
-              baseFrequency="0.78"
-              numOctaves="3"
-              stitchTiles="stitch"
-            />
-            <feColorMatrix type="saturate" values="0" />
-          </filter>
-          <rect width="100%" height="100%" filter="url(#portfolio-grain)" />
-        </svg>
-      </div>
-      <div
-        aria-hidden="true"
-        className="pointer-events-none fixed inset-0 z-[3] bg-[radial-gradient(ellipse_at_center,transparent_42%,rgba(0,0,0,0.55)_100%)]"
-      />
-    </>
+    <div
+      aria-hidden="true"
+      className="pointer-events-none fixed inset-0 z-[70] opacity-[0.045] mix-blend-soft-light"
+    >
+      <svg className="h-full w-full" xmlns="http://www.w3.org/2000/svg">
+        <filter id="portfolio-grain">
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency="0.78"
+            numOctaves="3"
+            stitchTiles="stitch"
+          />
+          <feColorMatrix type="saturate" values="0" />
+        </filter>
+        <rect width="100%" height="100%" filter="url(#portfolio-grain)" />
+      </svg>
+    </div>
   );
 }
 

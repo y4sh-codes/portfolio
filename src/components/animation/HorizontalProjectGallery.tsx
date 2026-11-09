@@ -37,7 +37,7 @@ export default function HorizontalProjectGallery() {
           trigger: section.current,
           start: "top top",
           end: "bottom bottom",
-          scrub: 1,
+          scrub: 0.3,
           invalidateOnRefresh: true,
         },
       });
@@ -53,7 +53,7 @@ export default function HorizontalProjectGallery() {
               trigger: section.current,
               start: "top top",
               end: "bottom bottom",
-              scrub: 1,
+              scrub: 0.3,
             },
           },
         );

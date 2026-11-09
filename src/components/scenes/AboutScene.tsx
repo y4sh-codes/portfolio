@@ -54,8 +54,6 @@ export default function AboutScene() {
       className="relative min-h-[132svh]"
       aria-labelledby="about-heading"
     >
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(8,9,11,0.94),rgba(8,9,11,0.84)_40%,rgba(8,9,11,0.94))] md:bg-[linear-gradient(90deg,rgba(8,9,11,0.9),rgba(8,9,11,0.55)_45%,rgba(8,9,11,0.2)_70%,rgba(8,9,11,0.55))]" />
-
       <div className="section-pad relative z-[2] flex min-h-[132svh] items-center py-32 md:py-40">
         <div className="grid w-full grid-cols-1 gap-16 md:grid-cols-[minmax(0,0.95fr)_minmax(0,0.85fr)] md:gap-10">
           <div className="max-w-xl">

@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { smoothScrollTo } from "@/lib/animations/smoothScroll";
 
 const links = [
   { href: "#about", label: "About", id: "about" },
@@ -60,6 +61,28 @@ export default function Navbar() {
     };
   }, [open]);
 
+  const scrollToSection = useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+      e.preventDefault();
+      const id = href.replace("#", "");
+      const el = document.getElementById(id);
+      if (!el) return;
+
+      const headerOffset = window.innerWidth >= 768 ? 80 : 64;
+      const targetY = Math.max(
+        0,
+        el.getBoundingClientRect().top +
+          window.scrollY -
+          (id === "hero" ? 0 : headerOffset),
+      );
+
+      setActive(id);
+      window.history.pushState(null, "", href);
+      smoothScrollTo(targetY, 680);
+    },
+    [],
+  );
+
   return (
     <>
       <header
@@ -73,6 +96,7 @@ export default function Navbar() {
         <div className="section-pad flex h-16 items-center justify-between md:h-20">
           <Link
             href="#hero"
+            onClick={(e) => scrollToSection(e, "#hero")}
             className="group flex items-center gap-3"
             aria-label="Yashraj Singh — back to top"
           >
@@ -89,6 +113,7 @@ export default function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
+                onClick={(e) => scrollToSection(e, link.href)}
                 className={cn(
                   "relative text-[0.62rem] font-medium uppercase tracking-label transition-colors duration-500 hover:text-paper",
                   active === link.id ? "text-paper" : "text-muted",
@@ -108,6 +133,7 @@ export default function Navbar() {
           <div className="flex items-center gap-3">
             <Link
               href="#contact"
+              onClick={(e) => scrollToSection(e, "#contact")}
               className="hidden items-center gap-2 border border-white/[0.15] px-4 py-2 text-[0.6rem] font-medium uppercase tracking-label text-paper transition-colors duration-500 hover:border-accent/60 hover:text-accent sm:flex"
             >
               Let&apos;s talk
@@ -144,7 +170,10 @@ export default function Navbar() {
               key={link.href}
               ref={index === 0 ? firstLink : undefined}
               href={link.href}
-              onClick={() => setOpen(false)}
+              onClick={(e) => {
+                setOpen(false);
+                scrollToSection(e, link.href);
+              }}
               className="group flex items-baseline gap-4 border-b border-white/[0.08] py-4"
             >
               <span className="label text-accent">0{index + 1}</span>

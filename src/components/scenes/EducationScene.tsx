@@ -66,8 +66,6 @@ export default function EducationScene() {
       className="relative min-h-[150svh]"
       aria-labelledby="education-heading"
     >
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(8,9,11,0.95),rgba(8,9,11,0.86)_42%,rgba(8,9,11,0.95))] md:bg-[linear-gradient(90deg,rgba(8,9,11,0.94),rgba(8,9,11,0.62)_46%,rgba(8,9,11,0.18)_72%,rgba(8,9,11,0.5))]" />
-
       <div className="section-pad relative z-[2] flex min-h-[150svh] items-center py-32 md:py-40">
         <div className="grid w-full grid-cols-1 gap-14 md:grid-cols-[minmax(0,0.98fr)_minmax(0,0.82fr)] md:gap-12">
           <div>

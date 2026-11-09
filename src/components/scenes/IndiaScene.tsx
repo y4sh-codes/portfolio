@@ -63,8 +63,6 @@ export default function IndiaScene() {
       className="relative min-h-[125svh]"
       aria-labelledby="india-heading"
     >
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(8,9,11,0.55),transparent_35%,transparent_62%,rgba(8,9,11,0.9))]" />
-
       <div className="section-pad relative z-[2] flex min-h-[125svh] flex-col justify-between py-32 md:py-40">
         <div className="india-label flex items-start justify-between">
           <SectionLabel index="03">Location</SectionLabel>

@@ -297,8 +297,8 @@ export default function ParticleField({ device, onReady }: ParticleFieldProps) {
     if (!group.current) return;
 
     const target = experienceState;
-    const stageDamp = 1 - Math.exp(-delta * 2.3);
-    const damp = 1 - Math.exp(-delta * 3.4);
+    const stageDamp = 1 - Math.exp(-delta * 4.4);
+    const damp = 1 - Math.exp(-delta * 4.6);
     const motion = device.reducedMotion ? 0 : 1;
 
     current.current.stage +=
