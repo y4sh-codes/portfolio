@@ -21,10 +21,11 @@ Two refinements to the existing portfolio:
 
 ## Goals
 
-- Loader particles start outside the viewport, converge into a readable “YS”
-  monogram, and settle into a subtle idle drift.
-- The progress bar starts at 1, rises smoothly, and reaches 100 only when the
-  portrait/font assets are ready. The loader fades out after 100.
+- Loader particles start scattered across the whole viewport, converge into a
+  readable “YS” monogram, and settle into a subtle idle drift.
+- The progress bar starts at 1 and follows a smooth fixed ~2.1 s curve to 100;
+  the last step to 100 waits for the portrait/font assets. The loader fades
+  out after 100.
 - Reduced-motion users see the finished monogram with no continuous motion
   and a quick transition.
 - At most one project card is expanded at any time across desktop, mobile and
@@ -51,11 +52,12 @@ Two refinements to the existing portfolio:
 
 ### Progress behavior
 
-- **Asset-gated smooth progress (chosen).** Rise quickly to about 92, crawl
-  toward 98 while assets load, then snap to 100 when `ready` is true. The
+- **Time-based, asset-gated progress (chosen).** The bar follows a smoothstep
+  curve from 1 to 98 over about 2.1 seconds, then eases to 100 once assets are
+  ready. If assets are slow, it holds at 98 instead of finishing early. The
   displayed percentage never goes backwards.
-- **Fixed-duration progress.** Looks smooth, but can reveal the hero before
-  the portrait is ready.
+- **Immediate jump to 100 when ready.** Fast, but the loader disappears before
+  the convergence reads as an animation.
 
 ### Exclusive descriptions
 
@@ -67,12 +69,14 @@ Two refinements to the existing portfolio:
 
 ## Decisions
 
+- The loader canvas fills the viewport, so particles begin across the entire
+  screen rather than inside a small cluster.
 - The loader monogram is drawn with a 900-weight sans-serif fallback so it
   renders before the web font finishes loading.
-- Each particle gets a small randomized delay, start radius and drift so the
-  convergence feels organic rather than mechanical.
+- Each particle gets a small randomized delay, start point, swirl and drift so
+  the convergence feels organic rather than mechanical.
 - The loader shows a three-digit counter (`001`–`100`) beside the bar.
-- The loader holds at 100 for roughly 350 ms before fading.
+- The loader holds at 100 for roughly 180 ms before fading over ~650 ms.
 - Opening the currently open card closes it; opening another card closes the
   first and opens the second.
 
@@ -84,6 +88,6 @@ Two refinements to the existing portfolio:
 
 ## What is left to the builder
 
-- Exact particle count, monogram font size and drift amplitude, tuned against
-  the 260 px canvas.
-- Exact easing curve for the progress crawl.
+- Exact particle count, monogram scale and drift amplitude, tuned across phone
+  and desktop viewports.
+- Exact easing curve for the progress ramp.

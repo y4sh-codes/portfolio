@@ -10,49 +10,61 @@ type LoadingScreenProps = {
 };
 
 type LoaderParticle = {
-  startX: number;
-  startY: number;
-  targetX: number;
-  targetY: number;
+  startNX: number;
+  startNY: number;
+  targetNX: number;
+  targetNY: number;
   size: number;
   delay: number;
   phase: number;
+  swirl: number;
   accent: boolean;
 };
 
-const CANVAS_SIZE = 260;
-const PARTICLE_COUNT = 220;
+const RAMP_SECONDS = 2.1;
+const MIN_PARTICLES = 320;
+const MAX_PARTICLES = 800;
 
-function buildMonogramTargets(size: number, count: number) {
+function smoothstep(value: number) {
+  const t = Math.min(1, Math.max(0, value));
+  return t * t * (3 - 2 * t);
+}
+
+function buildMonogramTargets(count: number) {
+  const sampleWidth = 460;
+  const sampleHeight = 230;
   const offscreen = document.createElement("canvas");
-  offscreen.width = size;
-  offscreen.height = size;
+  offscreen.width = sampleWidth;
+  offscreen.height = sampleHeight;
   const context = offscreen.getContext("2d", { willReadFrequently: true });
 
   const fallback = () =>
     Array.from({ length: count }, (_, index) => {
       const angle = (index / count) * Math.PI * 2;
       return {
-        x: size / 2 + Math.cos(angle) * 86,
-        y: size / 2 + Math.sin(angle) * 86,
+        nx: (Math.cos(angle) * 0.34) / 2,
+        ny: (Math.sin(angle) * 0.34) / 2,
       };
     });
 
   if (!context) return fallback();
 
-  context.clearRect(0, 0, size, size);
+  context.clearRect(0, 0, sampleWidth, sampleHeight);
   context.fillStyle = "#fff";
   context.textAlign = "center";
   context.textBaseline = "middle";
-  context.font = "900 112px Montserrat, system-ui, sans-serif";
-  context.fillText("YS", size / 2, size / 2 - 4);
+  context.font = "900 180px Montserrat, system-ui, sans-serif";
+  context.fillText("YS", sampleWidth / 2, sampleHeight / 2 + 4);
 
-  const pixels = context.getImageData(0, 0, size, size).data;
-  const points: { x: number; y: number }[] = [];
-  for (let y = 0; y < size; y += 2) {
-    for (let x = 0; x < size; x += 2) {
-      if (pixels[(y * size + x) * 4 + 3] > 120) {
-        points.push({ x, y });
+  const pixels = context.getImageData(0, 0, sampleWidth, sampleHeight).data;
+  const points: { nx: number; ny: number }[] = [];
+  for (let y = 0; y < sampleHeight; y += 2) {
+    for (let x = 0; x < sampleWidth; x += 2) {
+      if (pixels[(y * sampleWidth + x) * 4 + 3] > 128) {
+        points.push({
+          nx: (x - sampleWidth / 2) / sampleWidth,
+          ny: (y - sampleHeight / 2) / sampleWidth,
+        });
       }
     }
   }
@@ -61,8 +73,8 @@ function buildMonogramTargets(size: number, count: number) {
   return Array.from({ length: count }, (_, index) => {
     const point = points[(index * 97) % points.length];
     return {
-      x: point.x + (Math.random() - 0.5) * 0.8,
-      y: point.y + (Math.random() - 0.5) * 0.8,
+      nx: point.nx + (Math.random() - 0.5) * 0.003,
+      ny: point.ny + (Math.random() - 0.5) * 0.003,
     };
   });
 }
@@ -89,9 +101,9 @@ export default function LoadingScreen({
     if (!ready || progress < 100 || completed.current) return;
     completed.current = true;
 
-    const duration = reducedMotion ? 0.01 : 0.9;
+    const duration = reducedMotion ? 0.01 : 0.65;
     const timeline = gsap.timeline({
-      delay: 0.35,
+      delay: 0.18,
       onComplete: () => onComplete(),
     });
 
@@ -99,7 +111,7 @@ export default function LoadingScreen({
       timeline.to(
         cluster.current,
         {
-          scale: reducedMotion ? 1 : 1.3,
+          scale: reducedMotion ? 1 : 1.06,
           opacity: 0,
           duration,
           ease: "power2.inOut",
@@ -116,7 +128,7 @@ export default function LoadingScreen({
           duration,
           ease: "power2.inOut",
         },
-        0.08,
+        0.04,
       );
     }
 
@@ -131,29 +143,37 @@ export default function LoadingScreen({
     const context = canvas.getContext("2d");
     if (!context) return;
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const size = CANVAS_SIZE;
-    canvas.width = size * dpr;
-    canvas.height = size * dpr;
-    canvas.style.width = `${size}px`;
-    canvas.style.height = `${size}px`;
-    context.scale(dpr, dpr);
+    let width = window.innerWidth;
+    let height = window.innerHeight;
 
-    const targets = buildMonogramTargets(size, PARTICLE_COUNT);
-    const particles: LoaderParticle[] = targets.map((target) => {
-      const angle = Math.random() * Math.PI * 2;
-      const radius = 120 + Math.random() * 160;
-      return {
-        startX: size / 2 + Math.cos(angle) * radius * 1.2,
-        startY: size / 2 + Math.sin(angle) * radius,
-        targetX: target.x,
-        targetY: target.y,
-        size: 0.7 + Math.random() * 1.4,
-        delay: Math.random() * 0.28,
-        phase: Math.random() * Math.PI * 2,
-        accent: Math.random() > 0.88,
-      };
-    });
+    const applySize = () => {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+      context.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    applySize();
+
+    const count = Math.round(
+      Math.min(
+        MAX_PARTICLES,
+        Math.max(MIN_PARTICLES, (width * height) / 2000),
+      ),
+    );
+    const targets = buildMonogramTargets(count);
+    const particles: LoaderParticle[] = targets.map((target) => ({
+      startNX: Math.random() * 1.14 - 0.07,
+      startNY: Math.random() * 1.14 - 0.07,
+      targetNX: target.nx,
+      targetNY: target.ny,
+      size: 0.45 + Math.random() * 1,
+      delay: Math.random() * 0.24,
+      phase: Math.random() * Math.PI * 2,
+      swirl: 18 + Math.random() * 70,
+      accent: Math.random() > 0.87,
+    }));
 
     let raf = 0;
     const start = performance.now();
@@ -162,16 +182,16 @@ export default function LoadingScreen({
       const elapsed = (now - start) / 1000;
 
       if (!reducedMotion) {
-        const natural =
-          elapsed < 2.4
-            ? 1 + 91 * (1 - Math.pow(1 - elapsed / 2.4, 3))
-            : Math.min(98, 92 + (elapsed - 2.4) * 1.4);
-        const target = readyValue.current ? 100 : natural;
-        const rate = readyValue.current ? 0.11 : 0.07;
-
-        progressValue.current += (target - progressValue.current) * rate;
-        if (readyValue.current && progressValue.current > 99.4) {
-          progressValue.current = 100;
+        const ramp = 1 + 97 * smoothstep(elapsed / RAMP_SECONDS);
+        if (!readyValue.current) {
+          progressValue.current = Math.min(98, ramp);
+        } else if (elapsed < RAMP_SECONDS) {
+          progressValue.current = ramp;
+        } else {
+          progressValue.current += (100 - progressValue.current) * 0.2;
+          if (progressValue.current > 99.6) {
+            progressValue.current = 100;
+          }
         }
       } else {
         progressValue.current = 100;
@@ -184,55 +204,83 @@ export default function LoadingScreen({
       }
 
       const formation = Math.min(1, progressValue.current / 100);
-      const globalEase = 1 - Math.pow(1 - formation, 3);
-      const center = size / 2;
+      const centerX = width / 2;
+      const centerY = height * 0.46;
+      const monoWidth = Math.min(360, width * 0.7, height * 0.5);
 
-      context.clearRect(0, 0, size, size);
+      context.clearRect(0, 0, width, height);
 
       const glow = context.createRadialGradient(
-        center,
-        center,
+        centerX,
+        centerY,
         0,
-        center,
-        center,
-        118,
+        centerX,
+        centerY,
+        monoWidth * 1.4,
       );
-      glow.addColorStop(0, "rgba(138,180,248,0.11)");
-      glow.addColorStop(0.5, "rgba(255,255,255,0.03)");
+      glow.addColorStop(0, "rgba(138,180,248,0.1)");
+      glow.addColorStop(0.45, "rgba(255,255,255,0.025)");
       glow.addColorStop(1, "rgba(0,0,0,0)");
       context.fillStyle = glow;
-      context.fillRect(0, 0, size, size);
+      context.fillRect(0, 0, width, height);
+
+      context.globalCompositeOperation = "lighter";
 
       for (const particle of particles) {
         const local = Math.max(
           0,
-          Math.min(1, (globalEase - particle.delay) / (1 - particle.delay)),
+          Math.min(1, (formation - particle.delay) / (1 - particle.delay)),
         );
         const ease = 1 - Math.pow(1 - local, 3);
-        const swirl = (1 - ease) * 16;
-        const drift = Math.sin(elapsed * 0.8 + particle.phase) * 0.8 * ease;
-        const x =
-          particle.startX +
-          (particle.targetX - particle.startX) * ease +
-          Math.cos(elapsed * 0.9 + particle.phase) * swirl +
-          drift;
-        const y =
-          particle.startY +
-          (particle.targetY - particle.startY) * ease +
-          Math.sin(elapsed * 0.9 + particle.phase) * swirl;
-        const alpha = 0.08 + ease * 0.92;
-        const pointSize = particle.size * (0.7 + ease * 0.5);
+        const orbit = elapsed * 0.65 + particle.phase;
+        const swirl = (1 - ease) * particle.swirl;
+        const idle = ease * 0.9;
+        const startX = particle.startNX * width;
+        const startY = particle.startNY * height;
+        const targetX = centerX + particle.targetNX * monoWidth;
+        const targetY = centerY + particle.targetNY * monoWidth;
 
+        const x =
+          startX +
+          (targetX - startX) * ease +
+          Math.cos(orbit) * swirl +
+          Math.cos(elapsed * 1.3 + particle.phase) * idle;
+        const y =
+          startY +
+          (targetY - startY) * ease +
+          Math.sin(orbit) * swirl +
+          Math.sin(elapsed * 1.3 + particle.phase) * idle;
+
+        const alpha = 0.14 + ease * 0.78;
+        const pointSize = particle.size * (0.6 + ease * 0.5);
+
+        context.fillStyle = particle.accent ? "#8ab4f8" : "#edf1f7";
+
+        context.globalAlpha = alpha * 0.1;
         context.beginPath();
-        context.fillStyle = particle.accent
-          ? `rgba(138,180,248,${alpha})`
-          : `rgba(255,255,255,${alpha})`;
+        context.arc(x, y, pointSize * 2.6, 0, Math.PI * 2);
+        context.fill();
+
+        context.globalAlpha = alpha;
+        context.beginPath();
         context.arc(x, y, pointSize, 0, Math.PI * 2);
         context.fill();
       }
 
+      context.globalAlpha = 1;
+      context.globalCompositeOperation = "source-over";
+
       if (!reducedMotion) raf = requestAnimationFrame(draw);
     };
+
+    const onResize = () => {
+      applySize();
+      if (reducedMotion) {
+        progressValue.current = 100;
+        draw(performance.now());
+      }
+    };
+    window.addEventListener("resize", onResize);
 
     if (reducedMotion) {
       progressValue.current = 100;
@@ -244,6 +292,7 @@ export default function LoadingScreen({
     }
 
     return () => {
+      window.removeEventListener("resize", onResize);
       cancelAnimationFrame(raf);
       context.setTransform(1, 0, 0, 1, 0, 0);
     };
@@ -252,36 +301,42 @@ export default function LoadingScreen({
   return (
     <div
       ref={overlay}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-ink"
+      className="fixed inset-0 z-[100] overflow-hidden bg-ink"
       role="status"
       aria-label="Loading portfolio"
     >
-      <div className="flex flex-col items-center gap-8">
-        <div ref={cluster} className="relative">
-          <canvas ref={canvasRef} aria-hidden="true" />
-        </div>
-        <div className="w-44">
-          <div className="mb-3 flex items-end justify-between">
-            <span className="label">Loading</span>
-            <span className="text-[0.62rem] uppercase tracking-label text-muted">
-              {String(progress).padStart(3, "0")}
-            </span>
-          </div>
-          <div
-            className="h-px w-full bg-white/10"
-            role="progressbar"
-            aria-valuemin={1}
-            aria-valuemax={100}
-            aria-valuenow={progress}
-            aria-label="Loading progress"
-          >
+      <canvas
+        ref={canvasRef}
+        aria-hidden="true"
+        className="absolute inset-0 h-full w-full"
+      />
+
+      <div ref={cluster} className="absolute inset-0">
+        <div className="absolute inset-x-0 top-[58%] flex flex-col items-center">
+          <div className="w-[min(260px,72vw)]">
+            <div className="mb-3 flex items-end justify-between">
+              <span className="label">Loading</span>
+              <span className="text-[0.62rem] uppercase tracking-label text-muted">
+                {String(progress).padStart(3, "0")}
+              </span>
+            </div>
             <div
-              className="h-px bg-paper transition-[width] duration-200 ease-linear"
-              style={{ width: `${progress}%` }}
-            />
+              className="h-px w-full bg-white/10"
+              role="progressbar"
+              aria-valuemin={1}
+              aria-valuemax={100}
+              aria-valuenow={progress}
+              aria-label="Loading progress"
+            >
+              <div
+                className="h-px bg-paper transition-[width] duration-100 ease-linear"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
           </div>
         </div>
       </div>
+
       <span className="sr-only">Loading Yashraj Singh&apos;s portfolio</span>
     </div>
   );
