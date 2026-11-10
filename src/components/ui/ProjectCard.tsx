@@ -9,11 +9,20 @@ import { cn } from "@/lib/utils";
 export default function ProjectCard({
   project,
   layout = "horizontal",
+  open: controlledOpen,
+  onToggle,
 }: {
   project: Project;
   layout?: "horizontal" | "vertical";
+  open?: boolean;
+  onToggle?: () => void;
 }) {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
+  const toggle = () => {
+    if (onToggle) onToggle();
+    else setInternalOpen((value) => !value);
+  };
   const descriptionId = useId();
 
   return (
@@ -38,7 +47,7 @@ export default function ProjectCard({
         aria-expanded={open}
         aria-controls={descriptionId}
         aria-label={`${open ? "Hide" : "Show"} details for ${project.name}`}
-        onClick={() => setOpen((value) => !value)}
+        onClick={toggle}
       />
 
       <div

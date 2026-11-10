@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -16,6 +16,9 @@ export default function HorizontalProjectGallery() {
   const track = useRef<HTMLDivElement>(null);
   const progress = useRef<HTMLSpanElement>(null);
   const reduced = useReducedMotion();
+  const [openId, setOpenId] = useState<string | null>(null);
+  const toggleProject = (id: string) =>
+    setOpenId((current) => (current === id ? null : id));
 
   useGSAP(
     () => {
@@ -102,13 +105,20 @@ export default function HorizontalProjectGallery() {
                 key={project.id}
                 project={project}
                 layout="vertical"
+                open={openId === project.id}
+                onToggle={() => toggleProject(project.id)}
               />
             ))}
           </div>
 
           <div className="no-scrollbar mt-10 flex snap-x snap-mandatory gap-5 overflow-x-auto overflow-y-hidden pb-6 desktop:hidden">
             {projects.map((project) => (
-              <ProjectCard key={project.id} project={project} />
+              <ProjectCard
+                key={project.id}
+                project={project}
+                open={openId === project.id}
+                onToggle={() => toggleProject(project.id)}
+              />
             ))}
           </div>
         </div>
@@ -151,7 +161,12 @@ export default function HorizontalProjectGallery() {
             className="no-scrollbar flex w-full snap-x snap-mandatory items-center gap-5 overflow-x-auto overflow-y-hidden scroll-pl-[6vw] px-[6vw] py-6 will-change-transform desktop:w-max desktop:snap-none desktop:overflow-visible desktop:gap-7 desktop:px-0 desktop:pb-0 desktop:pl-[6vw] desktop:pr-[8vw] desktop:py-0"
           >
             {projects.map((project) => (
-              <ProjectCard key={project.id} project={project} />
+              <ProjectCard
+                key={project.id}
+                project={project}
+                open={openId === project.id}
+                onToggle={() => toggleProject(project.id)}
+              />
             ))}
           </div>
         </div>
