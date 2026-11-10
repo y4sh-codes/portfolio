@@ -20,9 +20,14 @@ export default function ProjectCard({
     <article
       data-project-card
       className={cn(
-        "group relative flex shrink-0 flex-col overflow-hidden border border-white/[0.12] bg-carbon/40 transition-colors duration-700 hover:border-accent/[0.35] hover:bg-carbon/60",
+        "group relative flex shrink-0 snap-start flex-col overflow-hidden border border-white/[0.12] bg-carbon/40 transition-colors duration-700 hover:border-accent/[0.35] hover:bg-carbon/60",
         layout === "horizontal"
-          ? "h-[62vh] w-[82vw] sm:w-[68vw] md:h-[66vh] md:w-[46vw] lg:w-[39vw] xl:w-[35vw]"
+          ? cn(
+              "w-[82vw] sm:w-[68vw] md:w-[58vw] desktop:w-[39vw] xl:w-[35vw]",
+              open
+                ? "h-auto min-h-[62vh] desktop:h-[66vh]"
+                : "h-[62vh] md:h-[66vh]",
+            )
           : "h-auto w-full",
       )}
       aria-labelledby={`project-${project.id}-title`}
@@ -39,7 +44,11 @@ export default function ProjectCard({
       <div
         className={cn(
           "pointer-events-none relative z-10 overflow-hidden border-b border-white/[0.1]",
-          layout === "horizontal" ? "h-[54%]" : "h-[46vh]",
+          layout === "horizontal"
+            ? open
+              ? "h-[30vh] md:h-[34vh] desktop:h-[54%]"
+              : "h-[54%]"
+            : "h-[46vh]",
         )}
       >
         <ProjectPreview variant={project.visual} />

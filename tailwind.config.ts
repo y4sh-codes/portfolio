@@ -9,6 +9,9 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      screens: {
+        desktop: "1180px",
+      },
       colors: {
         ink: "#08090B",
         carbon: "#101216",
