@@ -78,13 +78,11 @@ export default function HorizontalProjectGallery() {
                 id="projects-heading"
                 className="display mt-6 text-[clamp(2.4rem,5vw,5.2rem)] text-glow"
               >
-                Selected
-                <br />
-                <span className="text-muted">projects.</span>
+                Projects<span className="text-muted">.</span>
               </h2>
             </div>
             <p className="max-w-xs text-sm leading-relaxed text-muted">
-              Four projects spanning multimodal AI, decentralised
+              A selection spanning multimodal AI, decentralised
               infrastructure, ocean data and diffusion-model research.
             </p>
           </div>
@@ -118,7 +116,7 @@ export default function HorizontalProjectGallery() {
               id="projects-heading"
               className="mt-4 text-[clamp(1.6rem,2.6vw,2.6rem)] font-semibold uppercase tracking-[-0.03em] text-paper"
             >
-              Four projects<span className="text-accent">.</span>
+              Projects<span className="text-accent">.</span>
             </h2>
           </div>
           <div className="hidden text-right md:block">

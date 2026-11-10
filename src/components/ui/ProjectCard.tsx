@@ -1,4 +1,7 @@
-import { ArrowUpRight, Github } from "lucide-react";
+"use client";
+
+import { useId, useState } from "react";
+import { ArrowUpRight, Github, Minus, Plus } from "lucide-react";
 import type { Project } from "@/data/projects";
 import ProjectPreview from "./ProjectPreview";
 import { cn } from "@/lib/utils";
@@ -10,6 +13,9 @@ export default function ProjectCard({
   project: Project;
   layout?: "horizontal" | "vertical";
 }) {
+  const [open, setOpen] = useState(false);
+  const descriptionId = useId();
+
   return (
     <article
       data-project-card
@@ -21,16 +27,25 @@ export default function ProjectCard({
       )}
       aria-labelledby={`project-${project.id}-title`}
     >
+      <button
+        type="button"
+        className="absolute inset-0 z-0 cursor-pointer"
+        aria-expanded={open}
+        aria-controls={descriptionId}
+        aria-label={`${open ? "Hide" : "Show"} details for ${project.name}`}
+        onClick={() => setOpen((value) => !value)}
+      />
+
       <div
         className={cn(
-          "relative overflow-hidden border-b border-white/[0.1]",
+          "pointer-events-none relative z-10 overflow-hidden border-b border-white/[0.1]",
           layout === "horizontal" ? "h-[54%]" : "h-[46vh]",
         )}
       >
         <ProjectPreview variant={project.visual} />
       </div>
 
-      <div className="flex flex-1 flex-col justify-between p-5 md:p-6">
+      <div className="pointer-events-none relative z-10 flex flex-1 flex-col justify-between p-5 md:p-6">
         <div>
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -44,14 +59,33 @@ export default function ProjectCard({
                 {project.tagline}
               </p>
             </div>
-            <span className="mt-1 shrink-0 text-[0.6rem] font-semibold tracking-label text-muted">
-              {project.index}
+            <span
+              className="mt-1 flex shrink-0 items-center gap-2"
+              aria-hidden="true"
+            >
+              <span className="text-[0.6rem] font-semibold tracking-label text-muted">
+                {project.index}
+              </span>
+              <span className="flex h-6 w-6 items-center justify-center border border-white/[0.12] text-accent/85">
+                {open ? <Minus size={12} /> : <Plus size={12} />}
+              </span>
             </span>
           </div>
 
-          <p className="mt-4 line-clamp-3 max-w-md text-[0.82rem] leading-relaxed text-muted">
-            {project.description}
-          </p>
+          <div
+            id={descriptionId}
+            aria-hidden={!open}
+            className={cn(
+              "grid transition-[grid-template-rows,opacity] duration-500 ease-cinematic",
+              open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+            )}
+          >
+            <div className="overflow-hidden">
+              <p className="mt-3 max-w-md text-[0.82rem] leading-relaxed text-muted">
+                {project.description}
+              </p>
+            </div>
+          </div>
         </div>
 
         <div className="mt-5">
@@ -68,7 +102,7 @@ export default function ProjectCard({
               href={project.repo}
               target="_blank"
               rel="noopener noreferrer"
-              className="link-underline text-[0.65rem] uppercase tracking-wide"
+              className="link-underline pointer-events-auto text-[0.65rem] uppercase tracking-wide"
             >
               <Github size={13} aria-hidden="true" />
               Repository
@@ -78,7 +112,7 @@ export default function ProjectCard({
                 href={project.demo}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="link-underline text-[0.65rem] uppercase tracking-wide"
+                className="link-underline pointer-events-auto text-[0.65rem] uppercase tracking-wide"
               >
                 <ArrowUpRight size={13} aria-hidden="true" />
                 Live demo
